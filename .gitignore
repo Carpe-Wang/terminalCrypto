@@ -1,0 +1,55 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+*.prof
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Build output
+/bin/
+/dist/
+/build/
+terminalCrypto
+terminalcrypto
+terminalcrypto-*
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Configuration and credentials (DO NOT commit these!)
+config.yaml
+.env
+*.key
+*.pem
+
+# User config directory
+.terminalcrypto/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# Temporary files
+*.tmp
+*.bak
+*.log

@@ -1,0 +1,21 @@
+# TerminalCrypto Configuration Example
+# Copy this file to ~/.terminalcrypto/config.yaml and customize
+
+# Default exchange to use
+exchange: binance
+
+# Enabled exchanges
+exchanges:
+  binance: true
+  coinbase: false
+  okx: false
+
+# Refresh interval for watch command (seconds)
+refresh_interval: 5
+
+# Display settings
+display:
+  # Base currency for prices (usually USDT or USD)
+  currency: USDT
+  # Number of decimal places to show
+  decimal_places: 2
