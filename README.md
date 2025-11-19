@@ -2,6 +2,8 @@
 
 A beautiful terminal-based cryptocurrency price tracker with support for multiple exchanges.
 
+English | [简体中文](README_CN.md)
+
 ## Features
 
 - 🚀 Real-time cryptocurrency price tracking
