@@ -62,6 +62,8 @@ crypto ticker BTC
 crypto setup binance
 ```
 
+📖 详细设置步骤请查看：[API 密钥设置指南](API_SETUP_CN.md)
+
 ### Q: 支持哪些币种？
 
 **A:** 所有 Binance 支持的币种，例如：
