@@ -31,7 +31,7 @@ func Factory(exchangeName, apiKey, apiSecret string) (Exchange, error) {
 	case "binance":
 		return NewBinanceClient(apiKey, apiSecret)
 	case "coinbase":
-		return nil, fmt.Errorf("coinbase support coming soon")
+		return NewCoinbaseV2Client(apiKey, apiSecret)
 	case "okx":
 		return nil, fmt.Errorf("okx support coming soon")
 	default:
