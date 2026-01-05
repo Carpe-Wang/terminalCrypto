@@ -13,7 +13,41 @@ import (
 	"github.com/Carpe-Wang/terminalCrypto/internal/keyring"
 	"github.com/Carpe-Wang/terminalCrypto/internal/models"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 )
+
+// isLightBackground 检测终端是否为浅色背景
+func isLightBackground() bool {
+	// 1. 优先检查环境变量 TERMINAL_THEME (用户可手动设置)
+	theme := os.Getenv("TERMINAL_THEME")
+	if theme == "light" {
+		return true
+	} else if theme == "dark" {
+		return false
+	}
+
+	// 2. 检查 COLORFGBG 环境变量
+	colorfgbg := os.Getenv("COLORFGBG")
+	if colorfgbg != "" {
+		parts := strings.Split(colorfgbg, ";")
+		if len(parts) > 0 {
+			bg := parts[len(parts)-1]
+			// 浅色背景值: 7 (白色), 15 (亮白色)
+			if bg == "7" || bg == "15" {
+				return true
+			}
+			// 深色背景值: 0-6, 8
+			if bg == "0" || bg == "1" || bg == "2" || bg == "3" ||
+				bg == "4" || bg == "5" || bg == "6" || bg == "8" {
+				return false
+			}
+		}
+	}
+
+	// 3. 使用 termenv 检测 (可能不准确)
+	output := termenv.NewOutput(os.Stdout)
+	return !output.HasDarkBackground()
+}
 
 func main() {
 	// 获取命令名称（btc, eth, sol 等）
@@ -46,6 +80,27 @@ func main() {
 
 	ctx := context.Background()
 
+	// 检测终端背景色
+	lightBg := isLightBackground()
+
+	// 根据背景色定义颜色
+	var priceColor, labelColor, borderColor, positiveColor, negativeColor string
+	if lightBg {
+		// 浅色背景配色方案
+		priceColor = "#000000"    // 黑色
+		labelColor = "#555555"    // 深灰色
+		borderColor = "#AAAAAA"   // 浅灰色边框
+		positiveColor = "#008800" // 深绿色
+		negativeColor = "#CC0000" // 深红色
+	} else {
+		// 深色背景配色方案
+		priceColor = "#FFFFFF"    // 白色
+		labelColor = "#888888"    // 灰色
+		borderColor = "#444444"   // 深灰色边框
+		positiveColor = "#00FF87" // 亮绿色
+		negativeColor = "#FF6B6B" // 亮红色
+	}
+
 	// 定义样式
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
@@ -59,26 +114,26 @@ func main() {
 
 	priceStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("#FFFFFF"))
+		Foreground(lipgloss.Color(priceColor))
 
 	bigPriceStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("#FFFFFF"))
+		Foreground(lipgloss.Color(priceColor))
 
 	positiveStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("#00FF87"))
+		Foreground(lipgloss.Color(positiveColor))
 
 	negativeStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("#FF6B6B"))
+		Foreground(lipgloss.Color(negativeColor))
 
 	labelStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#888888"))
+		Foreground(lipgloss.Color(labelColor))
 
 	boxStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#444444")).
+		BorderForeground(lipgloss.Color(borderColor)).
 		Padding(1, 2)
 
 	// 获取 Ticker 数据
