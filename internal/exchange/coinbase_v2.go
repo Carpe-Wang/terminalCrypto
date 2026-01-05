@@ -38,6 +38,16 @@ type coinbaseStatsResponse struct {
 	Volume string `json:"volume"`
 }
 
+// Coinbase Exchange API 响应结构 (公开免费API)
+type coinbaseExchangeStatsResponse struct {
+	Open        string `json:"open"`
+	High        string `json:"high"`
+	Low         string `json:"low"`
+	Last        string `json:"last"`
+	Volume      string `json:"volume"`
+	Volume30day string `json:"volume_30day"`
+}
+
 // NewCoinbaseV2Client creates a new Coinbase client using public API
 func NewCoinbaseV2Client(apiKey, apiSecret string) (*CoinbaseV2Client, error) {
 	httpClient := &http.Client{
@@ -148,23 +158,47 @@ func (c *CoinbaseV2Client) GetTicker(ctx context.Context, symbol string) (*model
 
 	normalizedSymbol := c.NormalizeSymbol(symbol)
 
-	// Get current price
-	currentPrice, err := c.GetPrice(ctx, symbol)
+	// 使用 Coinbase Exchange API 获取真实的24h数据 (公开免费)
+	exchangeURL := fmt.Sprintf("https://api.exchange.coinbase.com/products/%s/stats", normalizedSymbol)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", exchangeURL, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Get 24h stats - we'll use a simplified approach
-	// Coinbase v2 API doesn't provide as detailed stats as Pro
-	// We'll calculate approximate values
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch stats: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("exchange API error %d: %s", resp.StatusCode, string(body))
+	}
+
+	var stats coinbaseExchangeStatsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {
+		return nil, fmt.Errorf("failed to decode stats: %w", err)
+	}
+
+	// 解析数据
+	lastPrice, _ := strconv.ParseFloat(stats.Last, 64)
+	openPrice, _ := strconv.ParseFloat(stats.Open, 64)
+	highPrice, _ := strconv.ParseFloat(stats.High, 64)
+	lowPrice, _ := strconv.ParseFloat(stats.Low, 64)
+	volume, _ := strconv.ParseFloat(stats.Volume, 64)
+
+	// 计算24h涨跌
+	change24h := lastPrice - openPrice
 
 	return &models.Ticker{
 		Symbol:      normalizedSymbol,
-		Price:       currentPrice,
-		Change24h:   0, // Would need historical data
-		Volume24h:   0, // Not available in simple API
-		High24h:     currentPrice * 1.05, // Approximate
-		Low24h:      currentPrice * 0.95, // Approximate
+		Price:       lastPrice,
+		Change24h:   change24h,
+		Volume24h:   volume,
+		High24h:     highPrice,
+		Low24h:      lowPrice,
 		LastUpdated: time.Now(),
 	}, nil
 }
