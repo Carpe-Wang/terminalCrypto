@@ -10,6 +10,7 @@ import (
 
 	"github.com/Carpe-Wang/terminalCrypto/internal/config"
 	"github.com/Carpe-Wang/terminalCrypto/internal/exchange"
+	"github.com/Carpe-Wang/terminalCrypto/internal/i18n"
 	"github.com/Carpe-Wang/terminalCrypto/internal/keyring"
 	"github.com/Carpe-Wang/terminalCrypto/internal/models"
 	"github.com/charmbracelet/lipgloss"
@@ -56,7 +57,7 @@ func main() {
 
 	// 初始化配置
 	if err := config.InitConfig(); err != nil {
-		fmt.Fprintf(os.Stderr, "配置初始化失败: %v\n", err)
+		fmt.Fprintf(os.Stderr, i18n.T("config_init_failed"), err)
 		os.Exit(1)
 	}
 
@@ -74,7 +75,7 @@ func main() {
 	// 创建交易所客户端
 	client, err := exchange.Factory(exchangeName, apiKey, apiSecret)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "创建交易所客户端失败: %v\n", err)
+		fmt.Fprintf(os.Stderr, i18n.T("exchange_client_failed"), err)
 		os.Exit(1)
 	}
 
@@ -139,7 +140,7 @@ func main() {
 	// 获取 Ticker 数据
 	ticker, err := client.GetTicker(ctx, symbol)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "获取 %s 数据失败: %v\n", symbol, err)
+		fmt.Fprintf(os.Stderr, i18n.T("fetch_data_failed"), symbol, err)
 		os.Exit(1)
 	}
 
@@ -154,7 +155,7 @@ func main() {
 	var sb strings.Builder
 
 	// 标题
-	sb.WriteString(titleStyle.Render(fmt.Sprintf(" %s 实时行情 ", symbol)))
+	sb.WriteString(titleStyle.Render(fmt.Sprintf(i18n.T("realtime_quote"), symbol)))
 	sb.WriteString("\n\n")
 
 	// 当前价格（大字体效果）
@@ -174,32 +175,32 @@ func main() {
 	sb.WriteString("\n\n")
 
 	// 24小时数据
-	sb.WriteString(labelStyle.Render("━━━ 24小时数据 ━━━\n"))
-	sb.WriteString(labelStyle.Render("最高: ") + priceStyle.Render(formatPrice(ticker.High24h)) + "  ")
-	sb.WriteString(labelStyle.Render("最低: ") + priceStyle.Render(formatPrice(ticker.Low24h)) + "\n")
+	sb.WriteString(labelStyle.Render(i18n.T("24h_data_header")))
+	sb.WriteString(labelStyle.Render(i18n.T("high")) + priceStyle.Render(formatPrice(ticker.High24h)) + "  ")
+	sb.WriteString(labelStyle.Render(i18n.T("low")) + priceStyle.Render(formatPrice(ticker.Low24h)) + "\n")
 
 	// 计算振幅
 	if ticker.Low24h > 0 {
 		amplitude := ((ticker.High24h - ticker.Low24h) / ticker.Low24h) * 100
-		sb.WriteString(labelStyle.Render("振幅: ") + priceStyle.Render(fmt.Sprintf("%.2f%%", amplitude)) + "\n")
+		sb.WriteString(labelStyle.Render(i18n.T("amplitude")) + priceStyle.Render(fmt.Sprintf("%.2f%%", amplitude)) + "\n")
 	}
 
 	// 成交量（如果有）
 	if ticker.Volume24h > 0 {
-		sb.WriteString(labelStyle.Render("成交量: ") + priceStyle.Render(formatVolume(ticker.Volume24h)) + "\n")
+		sb.WriteString(labelStyle.Render(i18n.T("volume")) + priceStyle.Render(formatVolume(ticker.Volume24h)) + "\n")
 	}
 
 	// 获取 K 线数据绘制走势图
 	candles, err := client.GetCandles(ctx, symbol, "1h", 24)
 	if err == nil && len(candles) > 0 {
 		sb.WriteString("\n")
-		sb.WriteString(labelStyle.Render("━━━ 24小时走势 ━━━\n"))
+		sb.WriteString(labelStyle.Render(i18n.T("24h_trend_header")))
 		sb.WriteString(renderMiniChart(candles))
 	}
 
 	// 底部信息
 	sb.WriteString("\n")
-	sb.WriteString(labelStyle.Render(fmt.Sprintf("来源: %s | %s",
+	sb.WriteString(labelStyle.Render(fmt.Sprintf(i18n.T("source"),
 		strings.ToUpper(client.GetName()),
 		time.Now().Format("2006-01-02 15:04:05"))))
 

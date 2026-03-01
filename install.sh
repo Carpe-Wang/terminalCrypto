@@ -1,44 +1,82 @@
 #!/bin/bash
 
-# TerminalCrypto 简化安装脚本
-
 set -e
 
+# Detect system language
+LOCALE=$(defaults read -g AppleLocale 2>/dev/null || echo "en_US")
+if [[ "$TERMCRYPTO_LANG" == zh* ]]; then
+    USE_ZH=true
+elif [[ "$TERMCRYPTO_LANG" == en* ]]; then
+    USE_ZH=false
+elif [[ "$LOCALE" == zh* ]]; then
+    USE_ZH=true
+else
+    USE_ZH=false
+fi
+
+msg() {
+    if $USE_ZH; then
+        echo "$1"
+    else
+        echo "$2"
+    fi
+}
+
 echo "==================================="
-echo "TerminalCrypto 简化安装"
+msg "TerminalCrypto 简化安装" "TerminalCrypto Installation"
 echo "==================================="
 echo ""
 
-# 构建项目
-echo "正在构建项目..."
+# Build
+msg "正在构建项目..." "Building project..."
 go build -o terminalcrypto
 
-# 创建简化的别名脚本
-echo "正在创建简化命令..."
+# Create simplified alias script
+msg "正在创建简化命令..." "Creating shortcut commands..."
 
-# 创建 crypto 命令（简化版）
-cat > crypto << 'EOF'
+# Create crypto command
+cat > crypto << 'CRYPTOEOF'
 #!/bin/bash
-# 简化的加密货币价格查询命令
 
-# 如果没有参数，显示帮助
+# Detect language
+LOCALE=$(defaults read -g AppleLocale 2>/dev/null || echo "en_US")
+if [[ "$TERMCRYPTO_LANG" == zh* ]]; then
+    USE_ZH=true
+elif [[ "$TERMCRYPTO_LANG" == en* ]]; then
+    USE_ZH=false
+elif [[ "$LOCALE" == zh* ]]; then
+    USE_ZH=true
+else
+    USE_ZH=false
+fi
+
 if [ $# -eq 0 ]; then
-    echo "用法: crypto <币种> [币种2] [币种3] ..."
-    echo ""
-    echo "示例:"
-    echo "  crypto BTC              # 查看 BTC 价格"
-    echo "  crypto BTC ETH SOL      # 查看多个币种价格"
-    echo ""
-    echo "其他命令:"
-    echo "  crypto watch BTC        # 实时监控 BTC"
-    echo "  crypto ticker BTC       # 查看 BTC 详细数据"
+    if $USE_ZH; then
+        echo "用法: crypto <币种> [币种2] [币种3] ..."
+        echo ""
+        echo "示例:"
+        echo "  crypto BTC              # 查看 BTC 价格"
+        echo "  crypto BTC ETH SOL      # 查看多个币种价格"
+        echo ""
+        echo "其他命令:"
+        echo "  crypto watch BTC        # 实时监控 BTC"
+        echo "  crypto ticker BTC       # 查看 BTC 详细数据"
+    else
+        echo "Usage: crypto <symbol> [symbol2] [symbol3] ..."
+        echo ""
+        echo "Examples:"
+        echo "  crypto BTC              # Check BTC price"
+        echo "  crypto BTC ETH SOL      # Check multiple prices"
+        echo ""
+        echo "Other commands:"
+        echo "  crypto watch BTC        # Watch BTC in real-time"
+        echo "  crypto ticker BTC       # Detailed BTC market data"
+    fi
     exit 0
 fi
 
-# 获取脚本所在目录
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# 检查第一个参数是否是特殊命令
 case "$1" in
     watch)
         shift
@@ -56,33 +94,32 @@ case "$1" in
         exec "$SCRIPT_DIR/terminalcrypto" --help
         ;;
     *)
-        # 默认就是查价格
         exec "$SCRIPT_DIR/terminalcrypto" price "$@"
         ;;
 esac
-EOF
+CRYPTOEOF
 
 chmod +x crypto
 
-# 安装到系统
+# Install to system
 echo ""
-echo "正在安装到 /usr/local/bin..."
+msg "正在安装到 /usr/local/bin..." "Installing to /usr/local/bin..."
 sudo cp terminalcrypto /usr/local/bin/
 sudo cp crypto /usr/local/bin/
 
 echo ""
 echo "==================================="
-echo "✅ 安装成功！"
+msg "✅ 安装成功！" "✅ Installation successful!"
 echo "==================================="
 echo ""
-echo "现在你可以直接使用："
+msg "现在你可以直接使用：" "You can now use:"
 echo ""
-echo "  crypto BTC              # 查看 BTC 价格"
-echo "  crypto BTC ETH SOL      # 查看多个币种"
-echo "  crypto watch BTC        # 实时监控"
-echo "  crypto ticker BTC       # 详细数据"
+msg "  crypto BTC              # 查看 BTC 价格" "  crypto BTC              # Check BTC price"
+msg "  crypto BTC ETH SOL      # 查看多个币种" "  crypto BTC ETH SOL      # Check multiple prices"
+msg "  crypto watch BTC        # 实时监控" "  crypto watch BTC        # Watch in real-time"
+msg "  crypto ticker BTC       # 详细数据" "  crypto ticker BTC       # Detailed market data"
 echo ""
-echo "首次使用建议运行（可选）："
+msg "首次使用建议运行（可选）：" "Recommended first-time setup (optional):"
 echo "  crypto setup binance"
 echo ""
-echo "祝你使用愉快！🚀"
+msg "祝你使用愉快！🚀" "Enjoy! 🚀"
