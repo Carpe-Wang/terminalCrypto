@@ -20,6 +20,16 @@
 
 ## 安装
 
+### 通过 npm 安装（推荐）
+
+```bash
+# 全局安装
+npm install -g terminalcrypto
+
+# 或直接使用，无需安装
+npx terminalcrypto price BTC
+```
+
 ### 从源码安装
 
 ```bash
