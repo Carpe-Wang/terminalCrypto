@@ -16,6 +16,16 @@ English | [简体中文](README_CN.md)
 
 ## Installation
 
+### From npm (Recommended)
+
+```bash
+# Global install
+npm install -g terminalcrypto
+
+# Or use directly without installing
+npx terminalcrypto price BTC
+```
+
 ### From Source
 
 ```bash

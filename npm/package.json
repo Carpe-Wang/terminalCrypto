@@ -1,0 +1,34 @@
+{
+  "name": "terminalcrypto",
+  "version": "0.1.0",
+  "description": "Real-time cryptocurrency price dashboard in your terminal",
+  "bin": {
+    "terminalcrypto": "lib/run.js"
+  },
+  "scripts": {
+    "postinstall": "node lib/install.js"
+  },
+  "keywords": [
+    "crypto",
+    "cryptocurrency",
+    "bitcoin",
+    "ethereum",
+    "terminal",
+    "cli",
+    "dashboard",
+    "price-tracker"
+  ],
+  "author": "Carpe-Wang",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Carpe-Wang/terminalCrypto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Carpe-Wang/terminalCrypto/issues"
+  },
+  "homepage": "https://github.com/Carpe-Wang/terminalCrypto#readme",
+  "engines": {
+    "node": ">=14"
+  }
+}
